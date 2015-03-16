@@ -1,0 +1,2 @@
+This is data of the Great Red Spot from Galileo images taken in 1996.  The images were navigated and deprojected by Dr. Ashwin Vasavada.  The original data can be found at:
+http://pds-atmospheres.nmsu.edu/Jupiter/jupiter.html

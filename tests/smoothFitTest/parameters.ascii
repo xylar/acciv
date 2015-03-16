@@ -1,0 +1,18 @@
+# Parameters for smoothFit
+# 
+
+# a file containing a 2D vector field on the same grid that the smoothFit will be
+# performed on.  The actual contents of the field are not important, just the grid itself.
+# (This method for defining the grid was chosen becuase it allows the reuse of ACCIV code.)
+inGridFileName = grid.h5
+
+# the input file name for the scattered vectors
+inScatteredFieldFileName = scatteredField.h5
+
+# the output file name for the smooth, grid field
+outGridFieldFileName = gridField.h5
+
+# the minimum number of scattered data points that neighbor a given b-spline control point, 
+# below which the control point is dropped from the fit
+smoothFitMinControlPointScatteredNeighbors = 16
+
