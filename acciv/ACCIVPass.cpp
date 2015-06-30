@@ -19,6 +19,12 @@
 #include <cstdlib>
 #include <algorithm>
 
+SInt32 lround(float x)
+{
+	SInt32 sign = (x > 0) ? 1 : ((x < 0) ? -1 : 0);
+	return sign*((SInt32)(fabs(x) + 0.5));
+}
+
 bool ACCIVPass::doPass(const UString & inFolder)
 {
 	folder = inFolder;
@@ -592,13 +598,24 @@ printf(" image pair %i %i\n", earlierImageIndices[imagePairs[pairIndex]], laterI
 
 		double deltaT = laterImageTimes[imagePairs[pairIndex+1]]
 		    - earlierImageTimes[imagePairs[pairIndex]];
+		UArray<double> floatSearchRange(4);
 		UArray<SInt32> localSearchRange(4);
 		for(SInt32 index = 0; index < 4; index++)
 		{
-			SInt32 sign = (searchRange[index] > 0 ? 1 : -1);
-			SInt32 magnitude = std::max(1,(SInt32)(fabs(searchRange[index])*deltaT/maxSeparationTime + 0.5));
-			localSearchRange[index] = sign*magnitude;
+			floatSearchRange[index] = searchRange[index]*deltaT/maxSeparationTime;
 		}
+		//printf("  search range [%f %f %f %f]\n", floatSearchRange[0], floatSearchRange[1], floatSearchRange[2],
+		//		floatSearchRange[3]);
+		double centerX = 0.5*(floatSearchRange[1]+floatSearchRange[0]);
+		double centerY = 0.5*(floatSearchRange[3]+floatSearchRange[2]);
+		//printf("  center: %f %f\n", centerX,centerY);
+		//printf("  minSearch [%i %i %i %i]\n", lround(centerX-0.5), lround(centerX+0.5), lround(centerY-0.5),
+		//		lround(centerY+0.5));
+		localSearchRange[0] = std::min(lround(centerX-1),lround(floatSearchRange[0]));
+		localSearchRange[1] = std::max(lround(centerX+1),lround(floatSearchRange[1]));
+		localSearchRange[2] = std::min(lround(centerY-1),lround(floatSearchRange[2]));
+		localSearchRange[3] = std::max(lround(centerY+1),lround(floatSearchRange[3]));
+
 		printf("  separation time: %f\n", deltaT);
 		printf("  range scaling: %f\n", deltaT/maxSeparationTime);
 		printf("  search range [%i %i %i %i]\n", localSearchRange[0], localSearchRange[1], localSearchRange[2],
