@@ -24,14 +24,14 @@ correlationTolerance = 1e-2
 minimumCorrelationCoefficient = 0.5;
 
 # the number of outer iterations of the overall function fitting and outlier removal process
-smoothFitOutlierRemovalIterationCount = 1
+smoothFitOutlierRemovalIterationCount = 2
 
 # the threshold constant for defining outliers: a point x_i is defined to be an outlier
 # if R_i > outlierThresholdConstant*median(R_i), where R_i = ||v_m(x_i) - v_s(x_i)||^2 
 # is the root-mean-squared difference between the measured velocity and the smooth
 # velocity interpolated to the same location, and where the median is taken over all
 # measurements in the data set
-outlierThresholdConstant = 12
+outlierThresholdConstant = 4
 
 # the number of inner iterations of streamline following, smooth function fitting process
 # within the outer iteration loop (zero for no streamline following, but a smooth function will
@@ -40,7 +40,7 @@ streamlineFollowingSmoothFitIterationCount = 2
 
 # the minimum number of scattered data points that neighbor a given b-spline control point, 
 # below which the control point is dropped from the fit
-smoothFitMinControlPointScatteredNeighbors = 32
+smoothFitMinControlPointScatteredNeighbors = 5
 
 # the number of vectors placed along each path by the streamline following process
 pathVectorCount = 13
