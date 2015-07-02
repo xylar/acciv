@@ -8,8 +8,8 @@ CPPFLAGS = -O3
 #CPPFLAGS = -g -D_DEBUG
 #CPPINCLUDES = -I./Utility -I/usr/include 
 #LIBS = -L. -lutility -L/usr/lib -lfftw3 -lhdf5 -lhdf5_cpp -lhdf5_hl -lhdf5_hl_cpp
-CPPINCLUDES = -I./Utility -I/opt/hdf5/include -I/opt/fftw3/include -I/opt/local/include
-LIBS = -L. -lutility -L/opt/hdf5/lib -L/opt/fftw3/lib -L/opt/local/lib -lfftw3 -lhdf5 -lhdf5_cpp -lhdf5_hl -lhdf5_hl_cpp
+CPPINCLUDES = -I./Utility -I/usr/local/HDF5/1.8.15/include -I/usr/local/include
+LIBS = -L. -lutility -L/usr/local/HDF5/1.8.15/lib -L/usr/local/lib -lfftw3 -lhdf5 -lhdf5_cpp -lhdf5_hl -lhdf5_hl_cpp
 RM = rm -f
 RANLIB = ranlib
 
