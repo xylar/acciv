@@ -1,0 +1,74 @@
+
+dummy: all
+
+CPP = g++
+LDFLAGS = -O3
+CPPFLAGS = -O3
+#LDFLAGS = -g -D_DEBUG
+#CPPFLAGS = -g -D_DEBUG
+#CPPINCLUDES = -I./Utility -I/usr/include 
+#LIBS = -L. -lutility -L/usr/lib -lfftw3 -lhdf5 -lhdf5_cpp -lhdf5_hl -lhdf5_hl_cpp
+CPPINCLUDES = -I./Utility -I/usr/local/HDF5/1.8.15/include -I/usr/local/include
+LIBS = -L. -lutility -L/usr/local/HDF5/1.8.15/lib -L/usr/local/lib -lfftw3 -lhdf5 -lhdf5_cpp -lhdf5_hl -lhdf5_hl_cpp
+RM = rm -f
+RANLIB = ranlib
+
+OBJS = Correlator.o \
+       MaskedImage.o \
+       ParameterFileReader.o \
+       QuadTree.o \
+       ScalarField2D.o \
+       ScatteredScalarData2D.o \
+       ScatteredVectorData2D.o \
+       TiePointSet.o \
+       VectorField2D.o \
+       ACCIVPass.o
+
+UTIL_OBJS = UString.o \
+       URandom.o \
+       UStreamFile.o
+
+UString.o: 
+	$(CPP) -c $(CPPFLAGS) $(CPPINCLUDES) Utility/core/UString.cpp -o $@
+
+UStreamFile.o: 
+	$(CPP) -c $(CPPFLAGS) $(CPPINCLUDES) Utility/platform/UStreamFile.cpp -o $@
+
+URandom.o: 
+	$(CPP) -c $(CPPFLAGS) $(CPPINCLUDES) Utility/tools/URandom.cpp -o $@
+
+$(OBJS): %.o: %.cpp
+	$(CPP) -c $(CPPFLAGS) $(CPPINCLUDES) $< -o $@
+
+ACCIV.o: %.o: %.cpp
+	$(CPP) -c $(CPPFLAGS) $(CPPINCLUDES) $< -o $@
+
+makeGeometryFactors.o: %.o: %.cpp
+	$(CPP) -c $(CPPFLAGS) $(CPPINCLUDES) $< -o $@
+
+makeMovie.o: %.o: %.cpp
+	$(CPP) -c $(CPPFLAGS) $(CPPINCLUDES) $< -o $@
+
+smoothFit.o: %.o: %.cpp
+	$(CPP) -c $(CPPFLAGS) $(CPPINCLUDES) $< -o $@
+
+all: acciv_main makeGeometryFactors smoothFit
+
+acciv_main: utility $(OBJS) ACCIV.o
+	$(CPP) $(LDFLAGS) -o acciv.exe $(OBJS) ACCIV.o $(LIBS)
+
+makeGeometryFactors: utility $(OBJS) makeGeometryFactors.o
+	$(CPP) $(LDFLAGS) -o makeGeometryFactors.exe $(OBJS) makeGeometryFactors.o $(LIBS)
+
+makeMovie: utility $(OBJS) makeMovie.o
+	$(CPP) $(LDFLAGS) -o makeMovie.exe $(OBJS) makeMovie.o $(LIBS)
+
+smoothFit: utility $(OBJS) smoothFit.o
+	$(CPP) $(LDFLAGS) -o smoothFit.exe $(OBJS) smoothFit.o $(LIBS)
+
+utility: $(UTIL_OBJS)
+	ar -rcs libutility.a $(UTIL_OBJS)
+
+clean:
+	$(RM) *.o acciv.exe libutility.a
+

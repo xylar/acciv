@@ -15,6 +15,6 @@ int main(int argc, char * argv[])
 	if(!result)
 		fprintf(stderr, "Pass failed!\n");
 
-	return 0;
+	return result? 0 : 1;
 }
 
