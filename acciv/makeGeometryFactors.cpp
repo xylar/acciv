@@ -117,7 +117,7 @@ int main(int argc, char * argv[])
 	if(!image.read(imageFileName))
 	{
 		fprintf(stderr, "Could not read image file %s", imageFileName);
-		return 0;
+		return 1;
 	}
 
 	double epsilon = Rp/Re;
@@ -165,7 +165,7 @@ int main(int argc, char * argv[])
 	if(!geometryFactors.write(geometryFactorsFileName))
 	{
 		fprintf(stderr, "Could not write geometry factors file %s", geometryFactorsFileName);
-		return 0;
+		return 1;
 	}
 
 	return 0;
