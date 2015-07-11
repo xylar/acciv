@@ -23,8 +23,8 @@ correlationTolerance = 1e-2
 # the minimum correlation coefficient for a tie point, below which it gets thrown out
 minimumCorrelationCoefficient = 0.5;
 
-# the number of outer iterations of the overall function fitting and outlier removal process
-smoothFitOutlierRemovalIterationCount = 1
+# whether to remove outliers before performing the final smooth fit
+removeScatteredOutliers = true
 
 # the threshold constant for defining outliers: a point x_i is defined to be an outlier
 # if R_i > outlierThresholdConstant*median(R_i), where R_i = ||v_m(x_i) - v_s(x_i)||^2 

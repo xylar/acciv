@@ -83,7 +83,7 @@ private:
 	double minimumTimeSeparation;
 	double maximumTimeSeparation;
 
-	SInt32 smoothFitOutlierRemovalIterationCount;
+	bool removeScatteredOutliers;
 	SInt32 streamlineFollowingSmoothFitIterationCount;
 	SInt32 smoothFitMinControlPointScatteredNeighbors;
 	SInt32 pathVectorCount;
