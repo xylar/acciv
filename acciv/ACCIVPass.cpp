@@ -265,10 +265,10 @@ bool ACCIVPass::getParameters()
 		maximumTimeSeparation = 1e8;
 	}
 
-	tag = "smoothFitOutlierRemovalIterationCount";
-	if(!reader.getInteger(tag, smoothFitOutlierRemovalIterationCount))
+	tag = "removeScatteredOutliers";
+	if(!reader.getBool(tag, removeScatteredOutliers))
 	{
-		smoothFitOutlierRemovalIterationCount = 1;
+		removeScatteredOutliers = false;
 	}
 	tag = "streamlineFollowingSmoothFitIterationCount";
 	if(!reader.getInteger(tag, streamlineFollowingSmoothFitIterationCount))
@@ -718,35 +718,31 @@ bool ACCIVPass::constructVelocities()
 	printf("  smooth fit mean residual: %g\n", meanRes);
 
 	UInt32 index = 0;
-	UInt32 outerCount = (smoothFitOutlierRemovalIterationCount == 0) ? 1 : 3;
+	UInt32 outerCount = removeScatteredOutliers ? 1 : 2;
 	for(UInt32 outerIndex = 0; outerIndex < outerCount; outerIndex++)
 	{
-		UInt32 count = streamlineFollowingSmoothFitIterationCount;
-		if(outerIndex == 1)
+		if(removeScatteredOutliers && (outerIndex == 1))
 		{
-			count = smoothFitOutlierRemovalIterationCount;
+			printf(" removing outliers\n");
+			UString newTiePointsFileName = UString::makeFormat(noOutlierTiePointsTemplate, index);
+			// call the outlier removal function
+			if(!removeOutliers(residuals,
+				currentTiePointsFileName,
+				newTiePointsFileName))
+				return false;
+			currentTiePointsFileName = newTiePointsFileName;
+		}
+		else
+		{
+			currentTiePointsFileName = combinedTiePointsFileName;
 		}
 
 		double previousRes = 0;
 		const double errorThreshold = 0.01;
-		for(UInt32 innerIndex = 0; innerIndex < count; innerIndex++)
+		for(UInt32 innerIndex = 0; innerIndex < streamlineFollowingSmoothFitIterationCount; innerIndex++)
 		{
 			printf(" curved-path/smooth-fit iteration %i\n", index);
-			if(outerIndex == 1)
-			{
-				printf(" removing outliers\n");
-				UString newTiePointsFileName = UString::makeFormat(noOutlierTiePointsTemplate, index);
-				// call the outlier removal function
-				if(!removeOutliers(residuals,
-					currentTiePointsFileName,
-					newTiePointsFileName))
-					return false;
-				currentTiePointsFileName = newTiePointsFileName;
-			}
-			else
-			{
-				currentTiePointsFileName = combinedTiePointsFileName;
-			}
+
 			currentScatteredVelocityFileName = UString::makeFormat(curvedPathScatteredVelocityTemplate, index);
 			// call the function that computes the new scattered velocity along curved paths
 			if(!constructVelocityAlongCurvedPaths(currentTiePointsFileName, currentGridVelocityFileName,

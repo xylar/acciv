@@ -36,8 +36,8 @@ minimumTimeSeparation = 0.0
 # the maximum time between images, above which image pairs will not be correlated
 maximumTimeSeparation = 1e8
 
-# the number of outer iterations of the overall function fitting and outlier removal process
-smoothFitOutlierRemovalIterationCount = 1
+# whether to remove outliers before performing the final smooth fit
+removeScatteredOutliers = true
 
 # the number of inner iterations of streamline following, smooth function fitting process
 # within the outer iteration loop (zero for no streamline following, but a smooth function will
