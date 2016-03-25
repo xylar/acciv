@@ -8,23 +8,58 @@ if sys.version_info[0] != 3:
 
 import numpy as np
 import h5py
-from attrdict import AttrMap,AttrDict
 from argparse import ArgumentParser
 import os.path
 import json
+import matplotlib as mpl
+mpl.use("agg")
+import matplotlib.cm as cm
+import matplotlib.ticker as ticker
+import matplotlib.pyplot as plt
+import matplotlib.colors as colors
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib.offsetbox import AnchoredOffsetbox, TextArea
 
-# Import Plot Settings
-sys.path.append( os.environ["PYTHONSCRIPT_DIR"] )
-import PlotSettings as pS
-import PlotSettings.generalSettings as gPS
-lineSettings = gPS.defaultLineSettings 
-markerSize   = gPS.defaultMarkerSize 
+# Plot Settings ==========================================================
+def cm2inch(value):
+      return value/2.54  
+def cm2pt(value):
+        return cm2inch(value)*72
+lineSettings =  {
+  "thin" : cm2pt(0.2/10),
+  "extra-thin" :  cm2pt(0.1/10),
+  "semi-thick" : cm2pt(0.3/10),
+  "thick" : cm2pt(0.4/10),
+  "extra-thick" : cm2pt(0.6/10)
+}
+defaultMarkerSize = cm2pt(1.2/10)
+markerSize   = defaultMarkerSize 
+
+def defaultFormatAxes(*axesArgs):
+      for axes in axesArgs:
+        if not isinstance(axes,list):
+            axes =  [axes]
+            
+        for ax in axes:
+            l = ax.get_legend()
+            if l is not None:
+                l.get_frame().set_linewidth(lineSettings["thin"])
+                
+            for spine in ax.spines.values():
+                  spine.set_linewidth(lineSettings["semi-thick"])
+                  
+def defaultFormatColorbar(*cbars):
+  for c in cbars:
+    c.outline.set_linewidth(lineSettings["thin"])
+# ========================================================================
+
+
 
 
 defaultPlotSettings ={
       "savePlots": True, 
       "figurePrefix":"fig",
-      "figureExt": ".pdf",
+      "figureExt": ".png",
       "showTitles": True,
       "x0" : 0,
       "y0" : 0
@@ -37,36 +72,23 @@ defaultOptions = {      "imageFileName": "image001.h5" ,
                         "plotSettings" : defaultPlotSettings
                  }
 
-
 def plotCmd():
     
     parser = ArgumentParser()
-    
     parser.add_argument("--folder", type=str, dest="folder", help="folder of the output data to be plotted")
     parser.add_argument("--imageFileName", type=str, dest="imageFileName", help="image file path")
     parser.add_argument("--gridFileName", type=str, dest="gridFileName")
     parser.add_argument("--scatterFileName", type=str,  dest="scatterFileName")
     parser.add_argument("--tiePointsFolder", type=str, dest="tiePointsFolder")
-    parser.add_argument("--plotSettings", type=str, dest="plotSettings")
-    
-    options = AttrMap(vars(parser.parse_args()))
-    
-    # load plotSettings if defined
-    if "plotSettings" in options:
-       f = open(options["plotSettings"],"r")
-       options["plotSettings"] = AttrMap(json.load(f))
 
+    options = vars(parser.parse_args())
     plot(options)
-
     
 def plot(options):
-    
-    if isinstance(options,dict):
-        options = AttrMap(options)
-    
+
     # overwrite options with default values if not existing!
     def makeComplete(d,defaults):
-      if isinstance(d,dict) or isinstance(d,AttrMap) or isinstance(d,AttrDict):
+      if isinstance(d,dict):
         for k in defaults.keys():
           if k not in d:
             d[k] = defaults[k]
@@ -80,39 +102,12 @@ def plot(options):
     makeComplete(options,defaultOptions)
             
     print("arguments:" , options)
-    plotSettings = options.plotSettings
-    
-    import matplotlib as mpl
-    # update matplotlib settings =======================================
-    pS.loadPlotSettings(mpl)
-    # ==================================================================
-    
-    import matplotlib.cm as cm
-    import matplotlib.ticker as ticker
-    import matplotlib.pyplot as plt
-    import matplotlib.colors as colors
-    from   mpl_toolkits.axes_grid1 import make_axes_locatable
-    from matplotlib.offsetbox import AnchoredOffsetbox, TextArea
-    
+    plotSettings = options["plotSettings"]
 
     """ Add an anchored text to the axis """
     def addText(ax, t, loc=2, textp = dict(size=12), pad = 0.1, borderpad = 0.5 ,
                 frameon =True, 
                 fc="white", ec="black" ,lw=1):
-        #box = TextArea(t, textprops=textp)
-        
-        #a = AnchoredOffsetbox(loc=loc,
-                             #child=box, pad=pad,
-                             #frameon=frameon,
-                             #borderpad=borderpad,
-                             #)
-        #a.patch.set_boxstyle("square",pad=0.1)
-        #a.patch.set_facecolor(fc)
-        #a.patch.set_edgecolor(ec)
-        #a.patch.set_linewidth(lw)
-
-        #ax.add_artist(a)
-        
         a = ax.annotate(t, (1,0), (0, -20), xycoords='axes fraction', textcoords='offset points', va='top', ha='right', **textp)
         
         return a
@@ -121,28 +116,28 @@ def plot(options):
     plt.close("all")
     
     noScatterFile = False
-    scatterFileName = os.path.join(options.folder,options.scatterFileName)
+    scatterFileName = os.path.join(options["folder"],options["scatterFileName"])
     if(not os.path.exists(scatterFileName)):
       noScatterFile = True
 
-    gridFileName = os.path.join(options.folder,options.gridFileName)
+    gridFileName = os.path.join(options["folder"],options["gridFileName"])
     if(not os.path.exists(gridFileName)):
       raise ValueError("not found:", gridFileName)
 
       
     
-    tiePointsFileName = os.path.join(options.folder,options.tiePointsFolder,"combinedCorrelationTiePoints.h5")
+    tiePointsFileName = os.path.join(options["folder"],options["tiePointsFolder"],"combinedCorrelationTiePoints.h5")
     if(not os.path.exists(tiePointsFileName)):
       print("not found:", tiePointsFileName)
       exit()
       
-    imageFileName = options.imageFileName
+    imageFileName = options["imageFileName"]
     if(not os.path.exists(imageFileName)):
       raise ValueError("not found:", imageFileName)
   
     # Plot Options =====================================================
     # figure titles
-    figureSize= (pS.cm2inch(16),pS.cm2inch(12))
+    figureSize= (cm2inch(16),cm2inch(12))
     figures={}
     figureTitles=dict()
     
@@ -166,8 +161,8 @@ def plot(options):
 
     # the locations of the major and minor axes to plot
     
-    x0 = plotSettings.x0
-    y0 = plotSettings.y0
+    x0 = plotSettings["x0"]
+    y0 = plotSettings["y0"]
 
         
     # the width around each axis to take points from when plotting axes
@@ -199,7 +194,7 @@ def plot(options):
     if not "frameIdx" in options:
         frameIdx = 0
     else:
-        frameIdx = options.frameIdx
+        frameIdx = options["frameIdx"]
         
     print("Time: ", time)
     bounds = h5File["bounds"][...]
@@ -350,14 +345,14 @@ def plot(options):
         ax.quiver(x[xAxisIndices], y[xAxisIndices], vx[xAxisIndices], vy[xAxisIndices], color='r', pivot='mid',  scale_units='xy', scale=scatterVectorScale, **quiverOpts)
         ax.quiver(x[yAxisIndices], y[yAxisIndices], vx[yAxisIndices], vy[yAxisIndices], color='b', pivot='mid',  scale_units='xy', scale=scatterVectorScale, **quiverOpts)
         
-        if plotSettings.showTitles:
+        if plotSettings["showTitles"]:
             ax.set_title(figureTitles[figCount])
             
         ax.set_xlabel("$x$ [m]")
         ax.set_ylabel("$y$ [m]")
         addText(ax,"t: %.04f s, frame: %i" % (time,frameIdx), loc=locFrame, textp = propFrameText)
         fig.tight_layout(pad=0.1)
-        pS.defaultFormatAxes(ax)
+        defaultFormatAxes(ax)
         
     ##fig = plt.figure(12, figsize=[width,height])
     ###fig.subplots_adjust(left=0.075, right=0.975, bottom=0.05, top=0.95, wspace=0.2, hspace=0.25)
@@ -374,14 +369,14 @@ def plot(options):
     ax.imshow(imageData, origin='lower', extent=(bounds[0],bounds[1],bounds[2],bounds[3]), cmap=colormap)
     ax.quiver(gridX[::skip,::skip], gridY[::skip,::skip], gridVx[::skip,::skip], gridVy[::skip,::skip], color='g', 
               pivot='tail',  scale_units='xy', scale=gridVectorScale)
-    if plotSettings.showTitles:
+    if plotSettings["showTitles"]:
         ax.set_title(figureTitles[figCount])
 
     ax.set_xlabel("$x$ [m]")
     ax.set_ylabel("$y$ [m]")
     addText(ax,"t: %.04f s, frame: %i" % (time,frameIdx), loc=locFrame, textp = propFrameText)
     fig.tight_layout(pad=0.1)
-    pS.defaultFormatAxes(ax)
+    defaultFormatAxes(ax)
     
     figCount+=1
     #figureTitles[figCount] = '$v_x$'
@@ -395,13 +390,13 @@ def plot(options):
     #im.set_clim(0,velocityMaxNorm)
     #ax.set_aspect('equal')
     #im.set_clim(velocityRange[0][0],velocityRange[1][0])
-    #if plotSettings.showTitles:
+    #if plotSettings["showTitles"]:
         #ax.set_title(figureTitles[figCount])
     #ax.set_xlabel("$x$ $[m]$")
     #ax.set_ylabel("$y$ $[m]$")
     #addText(ax,"t: %.04f s, frame: %i" % (time,frameIdx), loc=locFrame, textp = propFrameText)
     #fig.tight_layout(pad=0.1)
-    #pS.defaultFormatAxes(ax)
+    #defaultFormatAxes(ax)
     
     #cax1.set_ylabel(r'$[m/s]$')
 
@@ -417,14 +412,14 @@ def plot(options):
     #im.set_clim(0,velocityMaxNorm)
     #ax.set_aspect('equal')
     #im.set_clim(velocityRange[0][1],velocityRange[1][1])
-    #if plotSettings.showTitles:
+    #if plotSettings["showTitles"]:
         #ax.set_title(figureTitles[figCount])
         
     #ax.set_xlabel("$x$ $[m]$")
     #ax.set_ylabel("$y$ $[m]$")
     #addText(ax,"t: %.04f s, frame: %i" % (time,frameIdx), loc=locFrame, textp = propFrameText)
     #fig.tight_layout(pad=0.1)
-    #pS.defaultFormatAxes(ax)
+    #defaultFormatAxes(ax)
     #cax1.set_ylabel(r'$[m/s]$')
 
 
@@ -439,7 +434,7 @@ def plot(options):
     c=fig.colorbar(im, cax = cax1)
     im.set_clim(0,velocityMaxNorm)
     ax.set_aspect('equal')
-    if plotSettings.showTitles:
+    if plotSettings["showTitles"]:
         ax.set_title(figureTitles[figCount])
         
     ax.set_xlabel("$x$ [m]")
@@ -448,8 +443,8 @@ def plot(options):
     
     addText(ax,"t: %.04f s, frame: %i" % (time,frameIdx), loc=locFrame, textp = propFrameText)
     fig.tight_layout(pad=0.1)
-    pS.defaultFormatAxes(ax)
-    pS.defaultFormatColorbar(c)
+    defaultFormatAxes(ax)
+    defaultFormatColorbar(c)
     
 
     if not noScatterFile:
@@ -466,12 +461,12 @@ def plot(options):
         ax.set_xlabel('velocity')
         ax.set_xlim(pixelShiftRange)
         ax.set_ylabel('tie point fraction')
-        if plotSettings.showTitles:
+        if plotSettings["showTitles"]:
             ax.set_title(figureTitles[figCount])
             
         ax.legend([r'$||\mathbf{v}||$','$v_x$','$v_y$'])
         fig.tight_layout(pad=0.1)
-        pS.defaultFormatAxes(ax)
+        defaultFormatAxes(ax)
 
         figCount+=1
         figureTitles[figCount] = 'pixel offset histograms (search range)'
@@ -484,12 +479,12 @@ def plot(options):
         ax.set_xlabel(r'pixel vel. $\cdot$maxDeltaT [px])')
         ax.set_xlim(pixelShiftRange)
         ax.set_ylabel('tie point fraction')
-        if plotSettings.showTitles:
+        if plotSettings["showTitles"]:
             ax.set_title(figureTitles[figCount])
         ax.legend([r'$||\mathbf{v}||$','$v_x$','$v_y$'])
         addText(ax,"t: %.04f s, frame: %i" % (time,frameIdx), loc=locFrame, textp = propFrameText)
         fig.tight_layout(pad=0.1)
-        pS.defaultFormatAxes(ax)
+        defaultFormatAxes(ax)
 
     #figCount+=1
     #fig = plt.figure(figCount,figsize=figureSize)
@@ -508,7 +503,7 @@ def plot(options):
     if not noScatterFile:
         ax.plot(vMag[maskYAxis], y[maskYAxis], '.k',ms=markerSize)
     ax.plot(vMagGrid[:,yAxisGridIndex] * imageFinalMask[:,yAxisGridIndex],gy, color=[0.5]*3, lw=lineSettings["thick"])
-    if plotSettings.showTitles:
+    if plotSettings["showTitles"]:
         ax.set_title(figureTitles[figCount])
     
     ax.set_xlim([0,velocityMaxNorm])
@@ -517,7 +512,7 @@ def plot(options):
     ax.set_ylabel('$y$ [m]')
     addText(ax,"t: %.04f s, frame: %i" % (time,frameIdx), loc=locFrame, textp = propFrameText)
     fig.tight_layout(pad=0.1)
-    pS.defaultFormatAxes(ax)
+    defaultFormatAxes(ax)
 
 
 
@@ -529,7 +524,7 @@ def plot(options):
     if not noScatterFile:
         ax.plot(x[maskXAxis], vMag[maskXAxis], '.k', ms=markerSize)
     ax.plot(gx,vMagGrid[xAxisGridIndex,:] * imageFinalMask[xAxisGridIndex,:] ,color=[0.5]*3 ,lw=lineSettings["thick"])
-    if plotSettings.showTitles:
+    if plotSettings["showTitles"]:
         ax.set_title(figureTitles[figCount])
 
     ax.set_xlim(bounds[0:2])
@@ -538,7 +533,7 @@ def plot(options):
     ax.set_xlabel('$x$ $[m]$')
     addText(ax,"t: %.04f s, frame: %i" % (time,frameIdx), loc=locFrame, textp = propFrameText)
     fig.tight_layout(pad=0.1)
-    pS.defaultFormatAxes(ax)
+    defaultFormatAxes(ax)
 
 
     #plot masked velocity with velocityMask
@@ -548,7 +543,7 @@ def plot(options):
     figures[figCount] = fig
     ax = fig.add_subplot(111, aspect='equal', axisbg=axisBG)
     absVelMasked = vMagGrid * imageFinalMask;
-    if plotSettings.showTitles:
+    if plotSettings["showTitles"]:
         ax.set_title(figureTitles[figCount])
     ax.set_xlabel('$x$ [m]')
     ax.set_ylabel('$y$ [m]')
@@ -575,8 +570,8 @@ def plot(options):
     ax.tick_params(top='off',right='off',bottom='off',left='off')
     addText(ax,"t: %.04f s, frame: %i" % (time,frameIdx), loc=locFrame, textp = propFrameText)
     
-    pS.defaultFormatAxes(ax)
-    pS.defaultFormatColorbar(c)
+    defaultFormatAxes(ax)
+    defaultFormatColorbar(c)
     fig.tight_layout(pad=0.1)
 
 
@@ -597,11 +592,11 @@ def plot(options):
       ax.set_ylabel('tie point fraction')
       ax.set_xlim([0,corrVelocityUncertaintyMax])
       ax.set_ylim([0,tiePointFractionMax])
-      if plotSettings.showTitles:
+      if plotSettings["showTitles"]:
         ax.set_title(figureTitles[figCount])
       addText(ax,"t: %.04f s, frame: %i" % (time,frameIdx), loc=locFrame, textp = propFrameText)
       fig.tight_layout(pad=0.1)
-      pS.defaultFormatAxes(ax)
+      defaultFormatAxes(ax)
       
       mean = np.mean(correlationLocationResiduals)
       med =np.median(correlationLocationResiduals)
@@ -618,22 +613,22 @@ def plot(options):
       ax.set_ylabel('tie point fraction')
       ax.set_xlim([0,corrLocationUncertaintyMax])
       ax.set_ylim([0,tiePointFractionMax])
-      if plotSettings.showTitles:
+      if plotSettings["showTitles"]:
         ax.set_title(figureTitles[figCount])
       addText(ax,"t: %.04f s, frame: %i" % (time,frameIdx), loc=locFrame, textp = propFrameText)
       fig.tight_layout(pad=0.1)
-      pS.defaultFormatAxes(ax)
+      defaultFormatAxes(ax)
     
 
     plt.draw()
     
-    if plotSettings.savePlots:
+    if plotSettings["savePlots"]:
         print("Saving plots...")
         for figIdx, fig in figures.items():
-            outFileName = os.path.join( options.folder, "%s%03i%s" % (plotSettings.figurePrefix, figIdx,plotSettings.figureExt) )
+            outFileName = os.path.join( options["folder"], "%s%03i%s" % (plotSettings["figurePrefix"], figIdx,plotSettings["figureExt"]) )
             fig.savefig(outFileName, dpi=600)
             plt.close(fig)
-        with open(os.path.join( options.folder, "figureTitles.json") ,"w" ) as f:
+        with open(os.path.join( options["folder"], "figureTitles.json") ,"w" ) as f:
             json.dump(figureTitles,f)
     
     else:
