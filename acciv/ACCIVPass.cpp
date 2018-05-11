@@ -19,11 +19,6 @@
 #include <cstdlib>
 #include <algorithm>
 
-SInt32 lround(float x)
-{
-	SInt32 sign = (x > 0) ? 1 : ((x < 0) ? -1 : 0);
-	return sign*((SInt32)(fabs(x) + 0.5));
-}
 
 bool ACCIVPass::doPass(const UString & inFolder)
 {
@@ -368,7 +363,7 @@ bool ACCIVPass::getGridInfo()
 	imageBounds[1] = gridVelocityScaling.getXUpper();
 	imageBounds[2] = gridVelocityScaling.getYLower();
 	imageBounds[3] = gridVelocityScaling.getYUpper();
-	
+
 	return true;
 }
 
@@ -832,7 +827,7 @@ bool ACCIVPass::combineTiePoints()
 
 	for(SInt32 pairIndex = 0; pairIndex < imagePairs.getSize(); pairIndex += 2)
 	{
-		UString fileName = UString::makeFormat(correlationTiePointTemplate, 
+		UString fileName = UString::makeFormat(correlationTiePointTemplate,
 			earlierImageIndices[imagePairs[pairIndex]],
 			laterImageIndices[imagePairs[pairIndex+1]]);
 		TiePointSet tiePoints;
@@ -992,7 +987,7 @@ bool ACCIVPass::constructGridVelocityFromScatteredVelocity(const UString & inOut
 		return false;
 
 	VectorField2D gridVelocity(imageSize[0], imageSize[1], imageBounds[0], imageBounds[1], imageBounds[2], imageBounds[3]);
-	
+
 	meanRes = 0.0;
 
 	scatteredVelocity.smoothFit(gridVelocity, minControlPointScatteredNeighbors, outResiduals, meanRes);
@@ -1204,7 +1199,7 @@ bool ACCIVPass::appendOneSigmaUncertainty(const UArray<vector2d> & residuals,
 	gridVelocityScaling.interpolate(scatteredVelocity.getX(),scatteredVelocity.getY(), vScale);
 
 	printf("  smooth fit RMS one-sigma uncertainty: %g\n", meanResidual);
-	
+
 	hid_t fileID = H5Fopen(inOutScatteredVelocityFileName, H5F_ACC_RDWR, H5P_DEFAULT);
 	if(fileID < 0)
 	{
@@ -1424,7 +1419,7 @@ bool ACCIVPass::appendCorrelationUncertainties()
 	rmsVelocityRes = sqrt(rmsVelocityRes/(double)velocityPointCount);
 	printf("  RMS correlation location uncertainty: %g\n", rmsLocationRes);
 	printf("  RMS correlation velocity uncertainty: %g\n", rmsVelocityRes);
-	
+
 	hid_t fileID = H5Fopen(combinedTiePointsFileName, H5F_ACC_RDWR, H5P_DEFAULT);
 	if(fileID < 0)
 	{
@@ -1459,7 +1454,7 @@ bool ACCIVPass::appendCorrelationUncertainties()
 	status = H5LTmake_dataset(fileID, dataSetName, 1, dimensions, H5T_NATIVE_DOUBLE, correlationLocationRes.getData());
 	if((status < 0))
 	{
-		fprintf(stderr, "CCIVPass::appendCorrelationUncertainties: Could not make dataset %s in file %s\n", 
+		fprintf(stderr, "CCIVPass::appendCorrelationUncertainties: Could not make dataset %s in file %s\n",
 			(const char *)dataSetName, (const char *)combinedTiePointsFileName);
 		return false;
 	}
@@ -1469,7 +1464,7 @@ bool ACCIVPass::appendCorrelationUncertainties()
 	status = H5LTmake_dataset(fileID, dataSetName, 1, dimensions, H5T_NATIVE_DOUBLE, correlationVelocityRes.getData());
 	if((status < 0))
 	{
-		fprintf(stderr, "CCIVPass::appendCorrelationUncertainties: Could not make dataset %s in file %s\n", 
+		fprintf(stderr, "CCIVPass::appendCorrelationUncertainties: Could not make dataset %s in file %s\n",
 			(const char *)dataSetName, (const char *)combinedTiePointsFileName);
 		return false;
 	}
@@ -1567,7 +1562,7 @@ bool ACCIVPass::removeOutliers(const UArray<vector2d> & residuals,
 	TiePointSet oldTiePoints, newTiePoints;
 	if(!oldTiePoints.read(inTiePointsFileName))
 		return false;
-	
+
 	SInt32 removedCount = 0;
 	// for each value of deltaT
 	for(SInt32 timeIndex = 0; timeIndex < oldTiePoints.getDeltaTs().getSize(); timeIndex++)
@@ -1613,7 +1608,7 @@ bool ACCIVPass::removeOutliers(const UArray<vector2d> & residuals,
 	// save the new tie points
 	if(!newTiePoints.write(outTiePointsFileName))
 		return false;
-	
+
 	return true;
 }
 
