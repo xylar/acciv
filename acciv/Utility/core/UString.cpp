@@ -106,7 +106,7 @@ UString UString::operator=( const UString& inString )
 UString UString::operator=( const char* inString )
 {
 	UInt32 length = strlen( inString );
-	
+
 	assureDataAvailable( length );
 	assureDataModifiable();
 
@@ -134,7 +134,7 @@ UString UString::operator+=( const char* inString )
 	UInt32 otherLength = strlen(inString);
 	assureDataAvailable( length + otherLength );
 	assureDataModifiable();
-	
+
 	memcpy( getDataBuffer() + length, inString, otherLength );
 	setDataLength( length + otherLength );
 	return *this;
@@ -361,7 +361,7 @@ void UString::insert( UInt32 inIndex, char inCharacter )
 {
 	UInt32 length = getLength();
 	U_ASSERT(inIndex <= length);
-	
+
 	length++;
 	assureDataAvailable(length);
 	assureDataModifiable();
@@ -636,7 +636,7 @@ void UString::trimLeft( const char* inCharacterSet )
 
 	char * buffer = getDataBuffer();
 
-	while(buffer != '\0')
+	while(*buffer != '\0')
 	{
 		if(strchr(inCharacterSet, *buffer) == NULL)
 			break;
@@ -776,7 +776,7 @@ void UString::split2( UString& dst1, UString& dst2, char separator ) const
 		int spaceIndex = tmp.find(' ');
 		if( tabIndex == -1 )
 			splitIndex = spaceIndex;
-		else if( spaceIndex == -1 ) 
+		else if( spaceIndex == -1 )
 			splitIndex = tabIndex;
 		else
 			splitIndex = spaceIndex < tabIndex ? spaceIndex : tabIndex;
@@ -897,7 +897,7 @@ void UString::reallocateData( UInt32 inStringLength )
 	newData->stringLength = std::min( inStringLength, getDataLength() );
 
 	memcpy( (char*)(newData+1), getDataBuffer(), newData->stringLength );
-	
+
 	setData( newData );
 	setDataLength( newData->stringLength );
 }
