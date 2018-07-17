@@ -1,5 +1,5 @@
 #!/bin/csh
-setenv acciv '../../acciv/acciv.exe'
+setenv acciv '../../acciv/acciv'
 echo $1
 stdbuf -oL $acciv $1 > $1/output.log
 python ../syntheticTestScripts/plotVelocities.py --folder=$1 --imageFileName=image001.h5 --savePlots

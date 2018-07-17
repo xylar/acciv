@@ -55,20 +55,20 @@ smoothFit.o: %.o: %.cpp
 all: acciv_main makeGeometryFactors smoothFit
 
 acciv_main: utility $(OBJS) ACCIV.o
-	$(CPP) $(LDFLAGS) -o acciv.exe $(OBJS) ACCIV.o $(LIBS)
+	$(CPP) $(LDFLAGS) -o acciv $(OBJS) ACCIV.o $(LIBS)
 
 makeGeometryFactors: utility $(OBJS) makeGeometryFactors.o
-	$(CPP) $(LDFLAGS) -o makeGeometryFactors.exe $(OBJS) makeGeometryFactors.o $(LIBS)
+	$(CPP) $(LDFLAGS) -o makeGeometryFactors $(OBJS) makeGeometryFactors.o $(LIBS)
 
 makeMovie: utility $(OBJS) makeMovie.o
-	$(CPP) $(LDFLAGS) -o makeMovie.exe $(OBJS) makeMovie.o $(LIBS)
+	$(CPP) $(LDFLAGS) -o makeMovie $(OBJS) makeMovie.o $(LIBS)
 
 smoothFit: utility $(OBJS) smoothFit.o
-	$(CPP) $(LDFLAGS) -o smoothFit.exe $(OBJS) smoothFit.o $(LIBS)
+	$(CPP) $(LDFLAGS) -o smoothFit $(OBJS) smoothFit.o $(LIBS)
 
 utility: $(UTIL_OBJS)
 	ar -rcs libutility.a $(UTIL_OBJS)
 
 clean:
-	$(RM) *.o acciv.exe libutility.a
+	$(RM) *.o acciv libutility.a
 

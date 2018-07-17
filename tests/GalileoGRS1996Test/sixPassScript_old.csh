@@ -1,6 +1,6 @@
 #!/bin/csh
-setenv acciv '../../../../acciv/acciv.exe'
-../../acciv/makeGeometryFactors.exe image001.h5 gridGeometryFactors.h5 centric
+setenv acciv '../../../../acciv/acciv'
+../../acciv/makeGeometryFactors image001.h5 gridGeometryFactors.h5 centric
 cd later/pass1
 date
 echo  later/pass1
