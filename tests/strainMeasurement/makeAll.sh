@@ -3,12 +3,12 @@ shopt -s expand_aliases
 
 which acciv
 if [ "$?" != "0" ]; then
-    alias acciv="../../../../acciv/acciv.exe"
+    alias acciv="../../../../acciv/acciv"
 fi
 
 which acciv-makeGeometryFactors
 if [ "$?" != "0" ]; then
-    alias acciv-makeGeometryFactors="../../acciv/makeGeometryFactors.exe"
+    alias acciv-makeGeometryFactors="../../acciv/makeGeometryFactors"
 fi
 
 set -e
