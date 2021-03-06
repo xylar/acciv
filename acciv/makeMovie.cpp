@@ -25,7 +25,7 @@ int main(int argc, char * argv[])
 	const UInt32 advectionMaxTimeStepCount = 10000;
 
 	makeDirectory(folderName);
-	
+
 	VectorField2D velocity;
 	if(!velocity.read(velocityFileName))
 	{
@@ -49,7 +49,7 @@ int main(int argc, char * argv[])
 	deltaT = (image2.getTime()-image1.getTime())/(stepCount-1);
 
 	UString fileName;
-	fileName.format("%s/image_f_%i.h5",folderName, 0);
+	fileName.format("%s/image_f_%03i.h5",folderName, 0);
 	if(!image1.write(fileName))
 	{
 		fprintf(stderr, "Could not write image file %s.\n", (const char *)fileName);
@@ -69,12 +69,12 @@ int main(int argc, char * argv[])
 	for(SInt32 tIndex = 1; tIndex < stepCount; tIndex++)
 	{
 		MaskedImage advectedImage = image1;
-		if(!advectedImage.advect(velocity,-deltaT,x,y,advectionErrorTolerance,advectionMaxTimeStepCount))
+		if(!advectedImage.advect(velocity,deltaT,x,y,advectionErrorTolerance,advectionMaxTimeStepCount))
 		{
 			fprintf(stderr, "Forward advection failed at frame %i .\n", tIndex);
 			return 0;
 		}
-		fileName.format("%s/image_f_%i.h5",folderName, tIndex);
+		fileName.format("%s/image_f_%03i.h5",folderName, tIndex);
 		if(!advectedImage.write(fileName))
 		{
 			fprintf(stderr, "Could not write image file %s.\n", (const char *)fileName);
@@ -90,7 +90,7 @@ int main(int argc, char * argv[])
 		y[imageIndex] = image1.getY()[yIndex];
 	}
 
-	fileName.format("%s/image_b_%i.h5",folderName, stepCount-1);
+	fileName.format("%s/image_b_%03i.h5",folderName, stepCount-1);
 	if(!image2.write(fileName))
 	{
 		fprintf(stderr, "Could not write image file %s.\n", (const char *)fileName);
@@ -99,12 +99,12 @@ int main(int argc, char * argv[])
 	for(SInt32 tIndex = stepCount-2; tIndex >= 0; tIndex--)
 	{
 		MaskedImage advectedImage = image2;
-		if(!advectedImage.advect(velocity,deltaT,x,y,advectionErrorTolerance,advectionMaxTimeStepCount))
+		if(!advectedImage.advect(velocity,-deltaT,x,y,advectionErrorTolerance,advectionMaxTimeStepCount))
 		{
-			fprintf(stderr, "Forward advection failed at frame %i .\n", tIndex);
+			fprintf(stderr, "Backward advection failed at frame %i .\n", tIndex);
 			return 0;
 		}
-		fileName.format("%s/image_b_%i.h5",folderName, tIndex);
+		fileName.format("%s/image_b_%03i.h5",folderName, tIndex);
 		if(!advectedImage.write(fileName))
 		{
 			fprintf(stderr, "Could not write image file %s.\n", (const char *)fileName);
@@ -114,13 +114,13 @@ int main(int argc, char * argv[])
 
 	for(SInt32 tIndex = 0; tIndex < stepCount; tIndex++)
 	{
-		fileName.format("%s/image_f_%i.h5",folderName, tIndex);
+		fileName.format("%s/image_f_%03i.h5",folderName, tIndex);
 		if(!image1.read(fileName))
 		{
 			fprintf(stderr, "Could not read image file %s.\n", (const char *)fileName);
 			return 0;
 		}
-		fileName.format("%s/image_b_%i.h5",folderName, tIndex);
+		fileName.format("%s/image_b_%03i.h5",folderName, tIndex);
 		if(!image2.read(fileName))
 		{
 			fprintf(stderr, "Could not read image file %s.\n", (const char *)fileName);
@@ -132,7 +132,7 @@ int main(int argc, char * argv[])
 			image1.getData()[dataIndex] = (1.0 - alpha)*image1.getData()[dataIndex]
 			    + alpha*image2.getData()[dataIndex];
 		}
-		fileName.format("%s/image_%i.h5",folderName, tIndex);
+		fileName.format("%s/image_%03i.h5",folderName, tIndex);
 		if(!image1.write(fileName))
 		{
 			fprintf(stderr, "Could not write image file %s.\n", (const char *)fileName);
